@@ -31,9 +31,9 @@ def make_filename(hani_url):
     return filename
 
 
-async def amain(text, voice, rate, filename):
+async def amain(text, voice, rate, volume, filename):
     """Main function"""
-    communicate = edge_tts.Communicate(text, voice, rate=rate, volume='+0%')
+    communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     await communicate.save(filename)
 
@@ -54,17 +54,22 @@ def app():
     st.subheader("한겨레 기사 URL을 넣으면 해당 기사를 음성으로 읽어줍니다.")
     hani_url = st.text_input(label="한겨레 기사 웹주소를 넣어주세요.", placeholder="https://www.hani.co.kr/arti/politics/politics_general/1091588.html", key="hani_url",)
     tts_button = st.button("오디오 기사 만들기")
+    # 목소리 선택
     voice_select = st.radio(
             "목소리를 선택하세요.",
             ('선희(여성)', '인준(남성)')
         )
     voices = {'선희(여성)': 'ko-KR-SunHiNeural', '인준(남성)': 'ko-KR-InJoonNeural'}
     voice = voices[voice_select]
+    # 읽기 속도
     rate_value = st.slider(
         "읽기 속도",
         0, 30,
     )
-    rate = '+' + str(rate_value+10) + '%'
+    rate = '+' + str(rate_value) + '%'
+    # 볼륨 조절
+    volume_value = st.slider("볼륨 조절", -50, +50)
+    volume = str(volume_rate) + '%'
     if tts_button:
         with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
             text = get_article(hani_url)
