@@ -68,8 +68,11 @@ def app():
     )
     rate = '+' + str(rate_value) + '%'
     # 볼륨 조절
-    volume_value = st.slider("볼륨 조절", 0, 100)
-    volume = '+' + str(volume_value) + '%'
+    volume_value = st.slider("볼륨 조절", -50, 50, 0)
+    volume_value = str(volume_value) + '%'
+    if volume_value >= 0:
+        volume = '+' + str(volume_value) + '%'
+        
     if tts_button:
         with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
             text = get_article(hani_url)
