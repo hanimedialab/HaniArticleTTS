@@ -45,6 +45,10 @@ def make_mp3(text, voice, filename):
         loop.close()
 
 def app():
+    st.set_page_config(
+        page_title="Hani Audio Article",
+        page_icon="https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/1024px-Speaker_Icon.svg.png"
+    )
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/1024px-Speaker_Icon.svg.png", width=150)
     st.title("Hani Audio Article")
     st.subheader("한겨레 기사 URL을 넣으면 해당 기사를 음성으로 읽어줍니다.")
