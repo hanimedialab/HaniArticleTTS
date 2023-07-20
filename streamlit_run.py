@@ -68,15 +68,15 @@ def app():
     )
     rate = '+' + str(rate_value) + '%'
     # 볼륨 조절
-    volume_value = st.slider("볼륨 조절", 0, 100)
-    volume = '+' + str(volume_rate) + '%'
+    volume_value = st.slider("볼륨 조절", -50, +50)
+    volume = str(volume_value) + '%'
     if tts_button:
         with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
             text = get_article(hani_url)
             filename = make_filename(hani_url)
             print("파일 위치: ", filename)
             try:
-                asyncio.run(amain(text, voice, rate, filename))
+                asyncio.run(amain(text, voice, rate, volume, filename))
                 print("mp3 : ", filename)
                 with open(filename, "rb") as f:
                     mp3_file = f.read()
