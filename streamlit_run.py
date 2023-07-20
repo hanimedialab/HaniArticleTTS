@@ -31,9 +31,9 @@ def make_filename(hani_url):
     return filename
 
 
-async def amain(text, voice, filename):
+async def amain(text, voice, rate, filename):
     """Main function"""
-    communicate = edge_tts.Communicate(text, voice)
+    communicate = edge_tts.Communicate(text, voice, rate=rate, volome='+0%')
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     await communicate.save(filename)
 
@@ -60,13 +60,18 @@ def app():
         )
     voices = {'선희(여성)': 'ko-KR-SunHiNeural', '인준(남성)': 'ko-KR-InJoonNeural'}
     voice = voices[voice_select]
+    rate_value = st.slider(
+        "읽기 속도",
+        0, 10, 20, 30
+    )
+    rate = '+' + str(rate_value+10)
     if tts_button:
         with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
             text = get_article(hani_url)
             filename = make_filename(hani_url)
             print("파일 위치: ", filename)
             try:
-                asyncio.run(amain(text, voice, filename))
+                asyncio.run(amain(text, voice, rate, filename))
                 print("mp3 : ", filename)
                 with open(filename, "rb") as f:
                     mp3_file = f.read()
