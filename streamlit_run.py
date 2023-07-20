@@ -33,7 +33,7 @@ def make_filename(hani_url):
 
 async def amain(text, voice, rate, filename):
     """Main function"""
-    communicate = edge_tts.Communicate(text, voice, rate=rate, volome='+0%')
+    communicate = edge_tts.Communicate(text, voice, rate=rate, volume='+0%')
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     await communicate.save(filename)
 
