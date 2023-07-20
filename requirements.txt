@@ -2,3 +2,4 @@ edge-tts
 requests
 beautifulsoup4
 streamlit
+lxml
