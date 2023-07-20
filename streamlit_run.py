@@ -64,7 +64,7 @@ def app():
         "읽기 속도",
         0, 30,
     )
-    rate = '+' + str(rate_value+10)
+    rate = '+' + str(rate_value+10) + '%'
     if tts_button:
         with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
             text = get_article(hani_url)
