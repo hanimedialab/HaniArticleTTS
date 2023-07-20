@@ -62,7 +62,7 @@ def app():
     voice = voices[voice_select]
     rate_value = st.slider(
         "읽기 속도",
-        0, 10, 20, 30
+        0, 30,
     )
     rate = '+' + str(rate_value+10)
     if tts_button:
