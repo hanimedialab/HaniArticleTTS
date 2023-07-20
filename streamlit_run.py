@@ -69,7 +69,7 @@ def app():
     rate = '+' + str(rate_value) + '%'
     # 볼륨 조절
     volume_value = st.slider("볼륨 조절", -50, 50, 0)
-    volume_value = str(volume_value) + '%'
+    volume = str(volume_value) + '%'
     if volume_value >= 0:
         volume = '+' + str(volume_value) + '%'
         
