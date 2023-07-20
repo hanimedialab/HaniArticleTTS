@@ -65,7 +65,6 @@ def app():
             text = get_article(hani_url)
             filename = make_filename(hani_url)
             print("파일 위치: ", filename)
-            # filename = BASE_FOLDER + "0101.mp3"
             try:
                 asyncio.run(amain(text, voice, filename))
                 print("mp3 : ", filename)
@@ -73,6 +72,8 @@ def app():
                     mp3_file = f.read()
                 st.audio(mp3_file, format='audio/mp3')
                 st.success("오디오 기사 생성 완료! 🥳")
+                st.write("오디오 재생기 오른쪽 ⋮ 를 눌러 mp3 파일을 내려받을 수 있습니다.")
+                st.write("원본 기사: ", hani_url)
             except Exception as e:
                 st.error(e)
 
