@@ -14,8 +14,9 @@ import tempfile as tf
 def get_article(hani_url):
     res = requests.get(hani_url)
     soup = BeautifulSoup(res.text, 'lxml')
-    article_body = soup.find('div', attrs={'class': 'text'}).text.strip()
+    article_text = soup.select('#a-left-scroll-in > div.article-text > div > div.text')
     soup.find('div', attrs={'class': 'image-area'}).decompose()
+    article_body = article_text[0].text.strip()
     # article_body = ""
     # for body in article_bodies:
     #     article_body += (body.text.strip() + '\n')
