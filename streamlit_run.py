@@ -67,7 +67,7 @@ async def amain(text, voice, rate, volume, audio_filename):
     """Main function"""
     communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
     os.makedirs(os.path.dirname(audio_filename), exist_ok=True)
-    await communicate.save(filename)
+    await communicate.save(audio_filename)
 
 # def make_mp3(text, voice, audio_filename, sub_filename):
 #     loop = asyncio.get_event_loop_policy().get_event_loop()
