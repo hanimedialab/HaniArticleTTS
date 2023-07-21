@@ -106,7 +106,7 @@ def app():
                 st.write("오디오 재생기 옆 ⋮ 버튼을 눌러 오디오 파일을 내려받을 수 있습니다.(확장자를 '.mp3'로 지정)")
 
                 with open(sub_filename, "rb") as f:
-                    st.download_button("Download VTT", f, file_name=filehead + '.vtt')
+                    st.download_button("자막 파일(VTT) 내려받기", f, file_name=filehead + '.vtt')
             except Exception as e:
                 st.error(e)
 
