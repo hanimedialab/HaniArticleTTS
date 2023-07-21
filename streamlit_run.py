@@ -6,6 +6,11 @@ from bs4 import BeautifulSoup
 import time
 import streamlit as st
 import tempfile as tf
+import webvtt
+
+# today_articles = "https://haninewsapi.vercel.app/api/v1/articles/today"
+# voice = "ko-KR-SunHiNeural"
+# voice = "ko-KR-InJoonNeural"
 
 # 기사 본문 뽑기
 def get_article(hani_url):
@@ -27,20 +32,36 @@ def create_temp_dir():
 def make_filename(hani_url):
     temp_dir = create_temp_dir()
     filehead = hani_url.split('/')[-1].split('.')[0]
-    filename = os.path.join(temp_dir + filehead + ".mp3")
-    return filename
+    audio_filename = os.path.join(temp_dir + filehead + ".mp3")
+    sub_filename = os.path.join(temp_dir + filehead + ".vtt")
+    return audio_filename, sub_filename, filehead
 
-
-async def amain(text, voice, rate, volume, filename):
+# 스트리밍 오디오/자막 파일 생성
+async def amain(text, voice, rate, volume, audio_filename, sub_filename):
     """Main function"""
     communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    await communicate.save(filename)
+    submaker = edge_tts.SubMaker()
+    os.makedirs(os.path.dirname(audio_filename), exist_ok=True)
+    with open(audio_filename, "wb") as file:
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                file.write(chunk["data"])
+            elif chunk["type"] == "WordBoundary":
+                submaker.create_sub((chunk["offset"], chunk["duration"]), chunk["text"])
+    os.makedirs(os.path.dirname(sub_filename), exist_ok=True)
+    with open(sub_filename, "w", encoding="utf-8") as file:
+        file.write(submaker.generate_subs())
 
-# def make_mp3(text, voice, filename):
+# async def amain(text, voice, rate, volume, filename):
+#     """Main function"""
+#     communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
+#     os.makedirs(os.path.dirname(filename), exist_ok=True)
+#     await communicate.save(filename)
+
+# def make_mp3(text, voice, audio_filename, sub_filename):
 #     loop = asyncio.get_event_loop_policy().get_event_loop()
 #     try:
-#         loop.run_until_complete(amain(text, filename))
+#         loop.run_until_complete(amain(text, voice, audio_filename, sub_filename))
 #     finally:
 #         loop.close()
 
@@ -72,21 +93,22 @@ def app():
     volume = str(volume_value) + '%'
     if volume_value >= 0:
         volume = '+' + str(volume_value) + '%'
-        
+    
     if tts_button:
         with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
             text = get_article(hani_url)
-            filename = make_filename(hani_url)
-            print("파일 위치: ", filename)
+            audio_filename, sub_filename, filehead = make_filename(hani_url)
             try:
-                asyncio.run(amain(text, voice, rate, volume, filename))
-                print("mp3 : ", filename)
-                with open(filename, "rb") as f:
+                asyncio.run(amain(text, voice, rate, volume, audio_filename, sub_filename))
+                print("mp3 : ", audio_filename)
+                print("vtt : ", sub_filename)
+                with open(audio_filename, "rb") as f:
                     mp3_file = f.read()
                 st.audio(mp3_file, format='audio/mp3')
                 st.success("오디오 기사 생성 완료! 🥳")
-                st.write("오디오 재생기 오른쪽 ⋮ 를 눌러 mp3 파일을 내려받을 수 있습니다.(확장자 '.mp3'로 설정)")
-                st.write("원본 기사: ", hani_url)
+
+                with open(sub_filename, "rb") as f:
+                    st.download_button("Download VTT", f, file_name=filehead + '.vtt')
             except Exception as e:
                 st.error(e)
 
