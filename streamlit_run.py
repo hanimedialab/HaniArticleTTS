@@ -15,6 +15,7 @@ def get_article(hani_url):
     res = requests.get(hani_url)
     soup = BeautifulSoup(res.text, 'lxml')
     article_body = soup.find('div', attrs={'class': 'text'}).text.strip()
+    soup.find('div', attrs={'class': 'image-area'}).decompose()
     # article_body = ""
     # for body in article_bodies:
     #     article_body += (body.text.strip() + '\n')
