@@ -14,12 +14,18 @@ import tempfile as tf
 def get_article(hani_url):
     res = requests.get(hani_url)
     soup = BeautifulSoup(res.text, 'lxml')
-    article_text = soup.select('#a-left-scroll-in > div.article-text > div > div.text')
-    soup.find('div', attrs={'class': 'image-area'}).decompose()
-    article_body = article_text[0].text.strip()
-    # article_body = ""
-    # for body in article_bodies:
-    #     article_body += (body.text.strip() + '\n')
+    article_body = soup.find('div', attrs={'class': 'text'}).text.strip()
+    try:
+        # 사진 설명 제거
+        img_caps = article_body.find_all('div', attrs={'class': 'image-area'})
+        for img in img_caps:
+            img.decompose()
+        # 중간 발문 제거
+        postscripts = article_body.find_all('span')
+        for span in postscripts:
+            span.decompose()
+    except:
+        pass
     # print(article_body)
     return article_body
 
