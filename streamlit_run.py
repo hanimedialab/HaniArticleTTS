@@ -113,7 +113,7 @@ def app():
                 asyncio.run(amain(text, voice, rate, volume, audio_filename, sub_filename))
                 with open(audio_filename, "rb") as f:
                     mp3_file = f.read()
-                if st.button("기사 듣기")
+                if st.button("기사 듣기"):
                     st.audio(mp3_file, format='audio/mp3')
                 st.success("오디오 기사 생성 완료! 🥳")
                 st.write("원본 기사: ", hani_url)
