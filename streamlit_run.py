@@ -14,19 +14,19 @@ import tempfile as tf
 def get_article(hani_url):
     res = requests.get(hani_url)
     soup = BeautifulSoup(res.text, 'lxml')
-    article_body = soup.find('div', attrs={'class': 'text'}).text.strip()
+    article_area = soup.find('div', attrs={'class': 'text'})
     try:
         # 사진 설명 제거
-        img_caps = article_body.find_all('div', attrs={'class': 'image-area'})
+        img_caps = article_area.find_all('div', attrs={'class': 'image-area'})
         for img in img_caps:
             img.decompose()
         # 중간 발문 제거
-        postscripts = article_body.find_all('span')
+        postscripts = article_area.find_all('span')
         for span in postscripts:
             span.decompose()
     except:
         pass
-    # print(article_body)
+    article_body = article_area.text.strip()
     return article_body
 
 # 임시 폴더 생성
