@@ -14,10 +14,10 @@ import tempfile as tf
 def get_article(hani_url):
     res = requests.get(hani_url)
     soup = BeautifulSoup(res.text, 'lxml')
-    article_bodies = soup.find('div', attrs={'class': 'text'}).find_all('p')
-    article_body = ""
-    for body in article_bodies:
-        article_body += (body.text.strip() + '\n')
+    article_bodies = soup.find('div', attrs={'class': 'text'}).text.strip()
+    # article_body = ""
+    # for body in article_bodies:
+    #     article_body += (body.text.strip() + '\n')
     # print(article_body)
     return article_body
 
