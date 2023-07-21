@@ -17,12 +17,12 @@ def get_article(hani_url):
     article_area = soup.find('div', attrs={'class': 'text'})
     try:
         # 사진 설명 제거
-        img_caps = article_area.find_all('div', attrs={'class': 'image-area'})
-        for img in img_caps:
-            img.decompose()
+        divs = article_area.find_all('div')
+        for div in divs:
+            div.decompose()
         # 중간 발문 제거
-        postscripts = article_area.find_all('span')
-        for span in postscripts:
+        spans = article_area.find_all('span')
+        for span in spans:
             span.decompose()
     except:
         pass
