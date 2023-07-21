@@ -85,7 +85,7 @@ def app():
                     mp3_file = f.read()
                 st.audio(mp3_file, format='audio/mp3')
                 st.success("오디오 기사 생성 완료! 🥳")
-                st.write("오디오 재생기 오른쪽 ⋮ 를 눌러 mp3 파일을 내려받을 수 있습니다.")
+                st.write("오디오 재생기 오른쪽 ⋮ 를 눌러 mp3 파일을 내려받을 수 있습니다.(확장자 '.mp3'로 설정)")
                 st.write("원본 기사: ", hani_url)
             except Exception as e:
                 st.error(e)
