@@ -4,7 +4,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import streamlit as st
-import tempfile as tf
+# import tempfile as tf
 
 # today_articles = "https://haninewsapi.vercel.app/api/v1/articles/today"
 # voice = "ko-KR-SunHiNeural"
@@ -30,19 +30,21 @@ def get_article(hani_url):
     return article_body
 
 # 임시 폴더 생성
-def create_temp_dir():
-    # Create a temporary directory
-    set_temp_dir = tf.TemporaryDirectory()
-    temp_dir = set_temp_dir.name + "/"
-    # 디렉터리 접근 권한 설정
-    os.chmod(temp_dir, 0o700)
-    return temp_dir
+# def create_temp_dir():
+#     # Create a temporary directory
+#     set_temp_dir = tf.TemporaryDirectory()
+#     temp_dir = set_temp_dir.name + "/"
+#     # 디렉터리 접근 권한 설정
+#     os.chmod(temp_dir, 0o700)
+#     return temp_dir
 
 def make_filename(hani_url):
-    temp_dir = create_temp_dir()
+    # temp_dir = create_temp_dir()
     filehead = hani_url.split('/')[-1].split('.')[0]
-    audio_filename = os.path.join(temp_dir + filehead + ".mp3")
-    sub_filename = os.path.join(temp_dir + filehead + ".vtt")
+    # audio_filename = os.path.join(temp_dir + filehead + ".mp3")
+    # sub_filename = os.path.join(temp_dir + filehead + ".vtt")
+    audio_filename = os.path.join(filehead + ".mp3")
+    sub_filename = os.path.join(filehead + ".vtt")
     return audio_filename, sub_filename, filehead
 
 # 스트리밍 오디오/자막 파일 생성
