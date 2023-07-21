@@ -37,12 +37,12 @@ async def amain(text, voice, rate, volume, filename):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     await communicate.save(filename)
 
-def make_mp3(text, voice, filename):
-    loop = asyncio.get_event_loop_policy().get_event_loop()
-    try:
-        loop.run_until_complete(amain(text, filename))
-    finally:
-        loop.close()
+# def make_mp3(text, voice, filename):
+#     loop = asyncio.get_event_loop_policy().get_event_loop()
+#     try:
+#         loop.run_until_complete(amain(text, filename))
+#     finally:
+#         loop.close()
 
 def app():
     st.set_page_config(
