@@ -133,6 +133,7 @@ def app():
                         file_name=filehead + '.mp3',
                         mime='audio/mp3'
                     )
+                    st.session_state.audio_created = True
                 
                     with open(sub_filename, "rb") as f:
                         st.download_button(
@@ -140,6 +141,7 @@ def app():
                             data=f, 
                             file_name=filehead + '.vtt'
                         )
+                        st.session_state.audio_created = True
             except Exception as e:
                 st.error("오류가 발생했습니다.")
                 st.error(e)
