@@ -74,7 +74,7 @@ def app():
         st.session_state['mp3_button'] = True
     else:
         if st.button("새로운 기사로 다시 시도하기"):
-            st.session_state['tts_button'] = False
+            st.session_state['mp3_button'] = False
             st.session_state['sub_button'] = False
 
     tts_button = st.button("오디오 기사 만들기", key='tts_button')
