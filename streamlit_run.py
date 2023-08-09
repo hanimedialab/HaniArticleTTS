@@ -53,45 +53,80 @@ async def amain(text, voice, rate, volume, audio_filename, sub_filename):
                 f.write('\n')
                 f.write(chunk.text)
 
-# Streamlit App
-st.set_page_config(page_title="한겨레 기사 TTS", page_icon=":guardsman:", layout="wide")
-
-st.title("한겨레 기사 TTS")
-
-st.write("한겨레 기사 링크를 입력해주세요.")
-hani_url = st.text_input("한겨레 기사 링크")
-
-if hani_url:
-    article_body = get_article(hani_url)
-    st.write(article_body)
-
-    if 'tts_button' not in st.session_state:
-        st.session_state['tts_button'] = False
+def app():
+    st.set_page_config(
+        page_title="Hani Audio Article",
+        page_icon="https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/1024px-Speaker_Icon.svg.png"
+    )
+    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/1024px-Speaker_Icon.svg.png", width=150)
+    st.title("Hani Audio Article")
+    st.subheader("한겨레 기사 URL을 넣으면 해당 기사를 음성으로 읽어줍니다.")
+    hani_url = st.text_input(label="한겨레 기사 웹주소를 넣어주세요.", placeholder="https://www.hani.co.kr/arti/politics/politics_general/1091588.html", key="hani_url",)
+    
+    # session_state 설정
+    if 'mp3_button' not in st.session_state:
+        st.session_state['mp3_button'] = False
     if 'sub_button' not in st.session_state:
         st.session_state['sub_button'] = False
 
-    if st.session_state['tts_button'] == False:
-        st.session_state['sub_button'] = False
-        st.session_state['tts_button'] = st.button("오디오 파일(mp3) 내려받기")
+    if st.session_state['tts_button'] == True:
+        st.session_state['sub_button'] = True
+        st.session_state['mp3_button'] = True
     else:
         if st.button("새로운 기사로 다시 시도하기"):
             st.session_state['tts_button'] = False
             st.session_state['sub_button'] = False
-        else:
-            st.session_state['sub_button'] = st.button("자막 파일(VTT) 내려받기")
 
-    if st.session_state['tts_button'] == True and st.session_state['sub_button'] == True:
-        voice = "ko-KR-SunHiNeural"
-        rate = 0.5
-        volume = 0.5
+    tts_button = st.button("오디오 기사 만들기", key='tts_button')
+    # 목소리 선택
+    voice_select = st.radio(
+            "목소리를 선택하세요.",
+            ('선희(여성)', '인준(남성)')
+        )
+    voices = {'선희(여성)': 'ko-KR-SunHiNeural', '인준(남성)': 'ko-KR-InJoonNeural'}
+    voice = voices[voice_select]
+    # 읽기 속도
+    rate_value = st.slider(
+        "읽기 속도",
+        0, 30,
+    )
+    rate = '+' + str(rate_value) + '%'
+    # 볼륨 조절
+    volume_value = st.slider("볼륨 조절", -50, 50, 0)
+    volume = str(volume_value) + '%'
+    if volume_value >= 0:
+        volume = '+' + str(volume_value) + '%'
+    
+    if tts_button:
+        with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
+            text = get_article(hani_url)
+            audio_filename, sub_filename, filehead = make_filename(hani_url)
+            try:
+                # asyncio.run(amain(text, voice, rate, volume, audio_filename))
+                asyncio.run(amain(text, voice, rate, volume, audio_filename, sub_filename))
+                with open(audio_filename, "rb") as f:
+                    mp3_file = f.read()
+                st.audio(mp3_file, format='audio/mp3')
+                st.success("오디오 기사 생성 완료! 🥳")
+                st.write("원본 기사: ", hani_url)
+                # st.write("오디오 재생기 옆 '⋮' 버튼을 눌러 오디오 파일을 내려받을 수 있습니다.(확장자를 '.mp3'로 지정)")
+                st.download_button(
+                    label="오디오 파일(MP3) 내려받기",
+                    data=mp3_file,
+                    file_name=filehead + '.mp3',
+                    mime='audio/mp3',
+                    key='mp3_button'
+                )
+                
+                with open(sub_filename, "rb") as f:
+                    st.download_button(
+                        lable="자막 파일(VTT) 내려받기", 
+                        data=f, 
+                        file_name=filehead + '.vtt', 
+                        key='sub_button'
+                    )
+            except Exception as e:
+                st.error(e)
 
-        audio_filename, sub_filename, filehead = make_filename(hani_url)
-        
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(amain(article_body, voice, rate, volume, audio_filename, sub_filename))
-
-        st.write(f"{filehead}.mp3 파일이 다운로드되었습니다.")
-        st.audio(audio_filename)
-        st.write(f"{filehead}.vtt 파일이 다운로드되었습니다.")
-        with open(sub_filename, 'r') as f:
-            st.write(f.read())
+if __name__ == "__main__":
+    app()
