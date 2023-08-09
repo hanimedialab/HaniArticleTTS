@@ -3,8 +3,17 @@ import edge_tts
 import os
 import requests
 from bs4 import BeautifulSoup
+import time
 import streamlit as st
 import tempfile as tf
+import webvtt
+
+# today_articles = "https://haninewsapi.vercel.app/api/v1/articles/today"
+BASE_FOLDER = "/Users/hanimedialab/Downloads/"
+
+
+# voice = "ko-KR-SunHiNeural"
+# voice = "ko-KR-InJoonNeural"
 
 # 기사 본문 뽑기
 def get_article(hani_url):
@@ -44,14 +53,31 @@ def make_filename(hani_url):
 # 스트리밍 오디오/자막 파일 생성
 async def amain(text, voice, rate, volume, audio_filename, sub_filename):
     """Main function"""
-    communicate = edge_tts.Communicate(text=text, voice=voice, rate=rate, volume=volume)
-    async with communicate as session:
-        async for chunk in session:
-            with open(audio_filename, 'ab') as f:
-                f.write(chunk)
-            with open(sub_filename, 'a') as f:
-                f.write('\n')
-                f.write(chunk.text)
+    communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
+    submaker = edge_tts.SubMaker()
+    os.makedirs(os.path.dirname(audio_filename), exist_ok=True)
+    with open(audio_filename, "wb") as file:
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                file.write(chunk["data"])
+            elif chunk["type"] == "WordBoundary":
+                submaker.create_sub((chunk["offset"], chunk["duration"]), chunk["text"])
+    os.makedirs(os.path.dirname(sub_filename), exist_ok=True)
+    with open(sub_filename, "w", encoding="utf-8") as file:
+        file.write(submaker.generate_subs())
+
+# async def amain(text, voice, rate, volume, filename):
+#     # Main function
+#     communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
+#     os.makedirs(os.path.dirname(filename), exist_ok=True)
+#     await communicate.save(filename)
+
+# def make_mp3(text, voice, audio_filename, sub_filename):
+#     loop = asyncio.get_event_loop_policy().get_event_loop()
+#     try:
+#         loop.run_until_complete(amain(text, voice, audio_filename, sub_filename))
+#     finally:
+#         loop.close()
 
 def app():
     st.set_page_config(
@@ -62,24 +88,7 @@ def app():
     st.title("Hani Audio Article")
     st.subheader("한겨레 기사 URL을 넣으면 해당 기사를 음성으로 읽어줍니다.")
     hani_url = st.text_input(label="한겨레 기사 웹주소를 넣어주세요.", placeholder="https://www.hani.co.kr/arti/politics/politics_general/1091588.html", key="hani_url",)
-    
-    # session_state 설정
-    if 'tts_button' not in st.session_state:
-        st.session_state.tts_button = False
-    if 'mp3_button' not in st.session_state:
-        st.session_state['mp3_button'] = False
-    if 'sub_button' not in st.session_state:
-        st.session_state['sub_button'] = False
-
-    if st.session_state['tts_button'] == True:
-        st.session_state['sub_button'] = True
-        st.session_state['mp3_button'] = True
-    else:
-        if st.button("새로운 기사로 다시 시도하기"):
-            st.session_state['mp3_button'] = False
-            st.session_state['sub_button'] = False
-
-    tts_button = st.button("오디오 기사 만들기", key='tts_button')
+    tts_button = st.button("오디오 기사 만들기")
     # 목소리 선택
     voice_select = st.radio(
             "목소리를 선택하세요.",
@@ -116,18 +125,17 @@ def app():
                     label="오디오 파일(MP3) 내려받기",
                     data=mp3_file,
                     file_name=filehead + '.mp3',
-                    mime='audio/mp3',
-                    key='mp3_button'
+                    mime='audio/mp3'
                 )
                 
                 with open(sub_filename, "rb") as f:
                     st.download_button(
-                        lable="자막 파일(VTT) 내려받기", 
+                        label="자막 파일(VTT) 내려받기", 
                         data=f, 
-                        file_name=filehead + '.vtt', 
-                        key='sub_button'
+                        file_name=filehead + '.vtt'
                     )
             except Exception as e:
+                st.error("오류가 발생했습니다.")
                 st.error(e)
 
 if __name__ == "__main__":
