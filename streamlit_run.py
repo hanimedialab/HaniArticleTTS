@@ -118,11 +118,10 @@ def app():
                 st.success("오디오 기사 생성 완료! 🥳")
                 st.write("원본 기사: ", hani_url)
                 # st.write("오디오 재생기 옆 '⋮' 버튼을 눌러 오디오 파일을 내려받을 수 있습니다.(확장자를 '.mp3'로 지정)")
-                mp3_filename = hani_url.split('/')[-1].split('.')[0]
                 st.download_button(
-                    label='Download MP3 File',
+                    label='오디오 파일(MP3) 내려받기',
                     data=mp3_file,
-                    file_name=mp3_filename,
+                    file_name=filehead + '.mp3',
                     mime='audio/mp3'
                     )
                 
