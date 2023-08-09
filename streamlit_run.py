@@ -64,7 +64,7 @@ async def amain(text, voice, rate, volume, audio_filename, sub_filename):
         file.write(submaker.generate_subs())
 
 # async def amain(text, voice, rate, volume, audio_filename):
-#     """Main function"""
+#     # Main function
 #     communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
 #     os.makedirs(os.path.dirname(audio_filename), exist_ok=True)
 #     await communicate.save(audio_filename)
