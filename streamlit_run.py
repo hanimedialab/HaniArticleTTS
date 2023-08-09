@@ -119,7 +119,7 @@ def app():
                 st.write("원본 기사: ", hani_url)
                 # st.write("오디오 재생기 옆 '⋮' 버튼을 눌러 오디오 파일을 내려받을 수 있습니다.(확장자를 '.mp3'로 지정)")
                 st.download_button(
-                    label='오디오 파일(MP3) 내려받기',
+                    label="오디오 파일(MP3) 내려받기",
                     data=mp3_file,
                     file_name=filehead + '.mp3',
                     mime='audio/mp3'
