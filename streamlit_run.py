@@ -50,7 +50,7 @@ def make_filename(hani_url):
 
 # 스트리밍 오디오/자막 파일 생성
 async def amain(text, voice, rate, volume, audio_filename, sub_filename):
-    """Main function"""
+    # Main function
     communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
     submaker = edge_tts.SubMaker()
     os.makedirs(os.path.dirname(audio_filename), exist_ok=True)
