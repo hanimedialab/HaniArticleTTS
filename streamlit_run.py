@@ -105,6 +105,10 @@ def app():
     volume = str(volume_value) + '%'
     if volume_value >= 0:
         volume = '+' + str(volume_value) + '%'
+
+    # Streamlit's session state를 초기화
+    if "audio_created" not in st.session_state:
+        st.session_state.audio_created = False
     
     if tts_button:
         with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
@@ -113,25 +117,29 @@ def app():
             try:
                 # asyncio.run(amain(text, voice, rate, volume, audio_filename))
                 asyncio.run(amain(text, voice, rate, volume, audio_filename, sub_filename))
-                with open(audio_filename, "rb") as f:
-                    mp3_file = f.read()
-                st.audio(mp3_file, format='audio/mp3')
-                st.success("오디오 기사 생성 완료! 🥳")
-                st.write("원본 기사: ", hani_url)
-                # st.write("오디오 재생기 옆 '⋮' 버튼을 눌러 오디오 파일을 내려받을 수 있습니다.(확장자를 '.mp3'로 지정)")
-                st.download_button(
-                    label="오디오 파일(MP3) 내려받기",
-                    data=mp3_file,
-                    file_name=filehead + '.mp3',
-                    mime='audio/mp3'
-                )
-                
-                with open(sub_filename, "rb") as f:
+                st.session_state.audio_created = True
+
+                # 오디오가 생성된 상태에서만 다운로드 버튼 표시
+                if st.session_state.audio_created:
+                    with open(audio_filename, "rb") as f:
+                        mp3_file = f.read()
+                    st.audio(mp3_file, format='audio/mp3')
+                    st.success("오디오 기사 생성 완료! 🥳")
+                    st.write("원본 기사: ", hani_url)
+                    # st.write("오디오 재생기 옆 '⋮' 버튼을 눌러 오디오 파일을 내려받을 수 있습니다.(확장자를 '.mp3'로 지정)")
                     st.download_button(
-                        label="자막 파일(VTT) 내려받기", 
-                        data=f, 
-                        file_name=filehead + '.vtt'
+                        label="오디오 파일(MP3) 내려받기",
+                        data=mp3_file,
+                        file_name=filehead + '.mp3',
+                        mime='audio/mp3'
                     )
+                
+                    with open(sub_filename, "rb") as f:
+                        st.download_button(
+                            label="자막 파일(VTT) 내려받기", 
+                            data=f, 
+                            file_name=filehead + '.vtt'
+                        )
             except Exception as e:
                 st.error("오류가 발생했습니다.")
                 st.error(e)
