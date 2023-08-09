@@ -64,6 +64,8 @@ def app():
     hani_url = st.text_input(label="한겨레 기사 웹주소를 넣어주세요.", placeholder="https://www.hani.co.kr/arti/politics/politics_general/1091588.html", key="hani_url",)
     
     # session_state 설정
+    if 'tts_button' not in st.session_state:
+        st.session_state.tts_button = False
     if 'mp3_button' not in st.session_state:
         st.session_state['mp3_button'] = False
     if 'sub_button' not in st.session_state:
