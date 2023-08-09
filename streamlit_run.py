@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 import time
 import streamlit as st
 import tempfile as tf
-import webvtt
 
 # today_articles = "https://haninewsapi.vercel.app/api/v1/articles/today"
 BASE_FOLDER = "/Users/hanimedialab/Downloads/"
