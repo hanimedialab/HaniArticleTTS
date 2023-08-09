@@ -8,7 +8,6 @@ import streamlit as st
 import tempfile as tf
 
 # today_articles = "https://haninewsapi.vercel.app/api/v1/articles/today"
-BASE_FOLDER = "/Users/hanimedialab/Downloads/"
 
 
 # voice = "ko-KR-SunHiNeural"
