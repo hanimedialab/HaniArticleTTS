@@ -92,7 +92,7 @@ def app():
             "목소리를 선택하세요.",
             ('여성', '남성')
         )
-    voices = {'선희(여성)': 'ko-KR-SunHiNeural', '인준(남성)': 'ko-KR-InJoonNeural'}
+    voices = {'여성': 'ko-KR-SunHiNeural', '남성': 'ko-KR-InJoonNeural'}
     voice = voices[voice_select]
     # 읽기 속도
     rate_value = st.slider(
