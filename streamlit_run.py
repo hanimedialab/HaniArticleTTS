@@ -90,7 +90,7 @@ def app():
     # 목소리 선택
     voice_select = st.radio(
             "목소리를 선택하세요.",
-            ('선희(여성)', '인준(남성)')
+            ('여성', '남성')
         )
     voices = {'선희(여성)': 'ko-KR-SunHiNeural', '인준(남성)': 'ko-KR-InJoonNeural'}
     voice = voices[voice_select]
