@@ -4,18 +4,19 @@ import os
 import streamlit as st
 import tempfile as tf
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.by import By
 import time
 
 # 기사 본문 뽑기
 def get_article(hani_url):
-    options = webdriver.ChromeOptions()
-    options.add_argument("headless")
-    options.add_argument(
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-    driver = webdriver.Chrome(ChromeDriverManager(version="latest").install(), options=options)
-    driver.maximize_window()
+    firefoxOptions = Options()
+    firefoxOptions.add_argument("--headless")
+    service = Service(GeckoDriverManager().install())
+    driver = webdriver.Firefox(options=firefoxOptions, service=service)
     driver.get(hani_url)
     title = driver.find_element(By.XPATH, '//*[@id="renewal2023"]/h3').text
     try:
