@@ -14,7 +14,9 @@ import time
 # 기사 본문 뽑기
 def get_article(hani_url):
     firefoxOptions = Options()
-    firefoxOptions.add_argument("--headless")
+    firefoxOptions.headless = True
+    firefoxOptions.use_automation_extension = False
+    firefoxOptions.disable_webdriver_extension = True
     service = Service(GeckoDriverManager().install())
     driver = webdriver.Firefox(options=firefoxOptions, service=service)
     driver.get(hani_url)
