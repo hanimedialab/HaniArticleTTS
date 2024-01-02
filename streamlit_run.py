@@ -1,36 +1,39 @@
 import asyncio
 import edge_tts
 import os
-import requests
-from bs4 import BeautifulSoup
-import time
 import streamlit as st
 import tempfile as tf
-
-# today_articles = "https://haninewsapi.vercel.app/api/v1/articles/today"
-
-
-# voice = "ko-KR-SunHiNeural"
-# voice = "ko-KR-InJoonNeural"
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+import time
 
 # 기사 본문 뽑기
 def get_article(hani_url):
-    res = requests.get(hani_url)
-    soup = BeautifulSoup(res.text, 'lxml')
-    article_area = soup.find('div', attrs={'class': 'text'})
+    options = webdriver.ChromeOptions()
+    options.add_argument("headless")
+    options.add_argument(
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    driver.maximize_window()
+    driver.get(hani_url)
+    title = driver.find_element(By.XPATH, '//*[@id="renewal2023"]/h3').text
     try:
-        # 사진 설명 제거
-        divs = article_area.find_all('div')
-        for div in divs:
-            div.decompose()
-        # 중간 발문 제거
-        spans = article_area.find_all('span')
-        for span in spans:
-            span.decompose()
+        subtitle = driver.find_element(By.XPATH, '//*[@id="renewal2023"]/h4').text
     except:
-        pass
-    article_body = article_area.text.strip()
-    return article_body
+        subtitle = ""
+    article_area = driver.find_elements(By.XPATH, '//*[@id="renewal2023"]/div[3]')
+    articles = article_area[0].find_elements(By.TAG_NAME, 'p') 
+    # print("제목: ", title)
+    article_body = ""
+    for article in articles:
+        print(article.text)
+        article_body += article.text + "\n"
+    return {
+        "title": title,
+        "subtitle": subtitle,
+        "article_body": article_body
+    }
 
 # 임시 폴더 생성
 def create_temp_dir():
@@ -64,23 +67,15 @@ async def amain(text, voice, rate, volume, audio_filename, sub_filename):
     with open(sub_filename, "w", encoding="utf-8") as file:
         file.write(submaker.generate_subs())
 
-# async def amain(text, voice, rate, volume, filename):
-#     # Main function
-#     communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
-#     os.makedirs(os.path.dirname(filename), exist_ok=True)
-#     await communicate.save(filename)
-
-# def make_mp3(text, voice, audio_filename, sub_filename):
-#     loop = asyncio.get_event_loop_policy().get_event_loop()
-#     try:
-#         loop.run_until_complete(amain(text, voice, audio_filename, sub_filename))
-#     finally:
-#         loop.close()
-
 def app():
+    # 세션 상태 가져오기
+    if "audio_file" not in st.session_state:
+        st.session_state.audio_file = None
+    if "sub_file" not in st.session_state:
+        st.session_state.sub_file = None
     st.set_page_config(
-        page_title="Hani Audio Article",
-        page_icon="https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/1024px-Speaker_Icon.svg.png"
+    page_title="Hani Audio Article",
+    page_icon="https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/1024px-Speaker_Icon.svg.png"
     )
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/1024px-Speaker_Icon.svg.png", width=150)
     st.title("Hani Audio Article")
@@ -90,14 +85,14 @@ def app():
     # 목소리 선택
     voice_select = st.radio(
             "목소리를 선택하세요.",
-            ('여성', '남성')
+            ('선희(여성)', '인준(남성)')
         )
-    voices = {'여성': 'ko-KR-SunHiNeural', '남성': 'ko-KR-InJoonNeural'}
+    voices = {'선희(여성)': 'ko-KR-SunHiNeural', '인준(남성)': 'ko-KR-InJoonNeural'}
     voice = voices[voice_select]
     # 읽기 속도
     rate_value = st.slider(
         "읽기 속도",
-        0, 30,
+        0, 30, 10
     )
     rate = '+' + str(rate_value) + '%'
     # 볼륨 조절
@@ -105,45 +100,39 @@ def app():
     volume = str(volume_value) + '%'
     if volume_value >= 0:
         volume = '+' + str(volume_value) + '%'
-
-    # Streamlit's session state를 초기화
-    if "audio_created" not in st.session_state:
-        st.session_state.audio_created = False
     
     if tts_button:
         with st.spinner("오디오 기사를 생성하고 있어요... 🧐"):
-            text = get_article(hani_url)
+            article = get_article(hani_url)
+            text = article['article_body']
             audio_filename, sub_filename, filehead = make_filename(hani_url)
             try:
                 # asyncio.run(amain(text, voice, rate, volume, audio_filename))
                 asyncio.run(amain(text, voice, rate, volume, audio_filename, sub_filename))
-                st.session_state.audio_created = True
-
-                # 오디오가 생성된 상태에서만 다운로드 버튼 표시
-                if st.session_state.audio_created:
-                    with open(audio_filename, "rb") as f:
-                        mp3_file = f.read()
-                    st.audio(mp3_file, format='audio/mp3')
-                    st.success("오디오 기사 생성 완료! 🥳")
-                    st.write("원본 기사: ", hani_url)
-                    st.write("오디오 재생기 옆 '⋮' 버튼을 눌러 오디오 파일을 내려받을 수 있습니다.(확장자를 '.mp3'로 지정)")
-                    if st.download_button(
+                with open(audio_filename, "rb") as f:
+                    mp3_file = f.read()
+                st.audio(mp3_file, format='audio/mp3')
+                st.success("오디오 기사 생성 완료! 🥳")
+                st.write("원본 기사: ", hani_url)
+                # 오디오 파일과 자막 파일을 세션 상태에 저장
+                st.session_state.audio_file = mp3_file
+                st.session_state.sub_file = sub_filename
+                # 세션 상태에 저장된 오디오 파일과 자막 파일을 사용
+                if st.session_state.audio_file is not None:
+                    st.audio(st.session_state.audio_file, format='audio/mp3')
+                    st.download_button(
                         label="오디오 파일(MP3) 내려받기",
-                        data=mp3_file,
+                        data=st.session_state.audio_file,
                         file_name=filehead + '.mp3',
                         mime='audio/mp3'
-                    ):
-                        st.session_state.audio_created = True
-                
-                    with open(sub_filename, "rb") as f:
-                        if st.download_button(
+                    )
+                if st.session_state.sub_file is not None:
+                    with open(st.session_state.sub_file, "rb") as f:
+                        st.download_button(
                             label="자막 파일(VTT) 내려받기", 
                             data=f, 
                             file_name=filehead + '.vtt'
-                        ):
-                            st.session_state.audio_created = True
-                    # st.markdown(f"<a href=\"{audio_filename}\" download>오디오 파일(MP3) 내려받기</a>", unsafe_allow_html=True)
-                    # st.markdown(f"<a href=\"{sub_filename}\" download>자막 파일(VTT) 내려받기</a>", unsafe_allow_html=True)
+                        )
             except Exception as e:
                 st.error("오류가 발생했습니다.")
                 st.error(e)
