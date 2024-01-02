@@ -14,7 +14,7 @@ def get_article(hani_url):
     options.add_argument("headless")
     options.add_argument(
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    driver = webdriver.Chrome(ChromeDriverManager(version="latest").install(), options=options)
     driver.maximize_window()
     driver.get(hani_url)
     title = driver.find_element(By.XPATH, '//*[@id="renewal2023"]/h3').text
